@@ -35,34 +35,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>ログイン | 生豆在庫管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body>
-    <?php if (!empty($error)) {
-        echo h($error);
-    } ?>
-    <form method="post" action="">
-        <div class="form-group">
-            <label for="username" class="form-label">
-                <i class="fas fa-user"></i>ユーザー名
-            </label>
-            <input type="text" id="username" name="username" class="form-input" required>
-        </div>
+<body class="login-page">
+    <div class="login-card">
+        <h1 class="login-title">生豆在庫管理 ログイン</h1>
+        <?php if (!empty($error)) : ?>
+            <p class="error-message"><?= h($error) ?></p>
+        <?php endif; ?>
+        <form method="post" action="">
+            <div class="form-group">
+                <label for="username" class="form-label">
+                    <i class="fas fa-user"></i>ユーザー名
+                </label>
+                <input type="text" id="username" name="username" class="form-input" required>
+            </div>
 
-        <div class="form-group">
-            <label for="password" class="form-label">
-                <i class="fas fa-lock"></i>パスワード
-            </label>
-            <input type="password" id="password" name="password" class="form-input" required>
-        </div>
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fas fa-lock"></i>パスワード
+                </label>
+                <input type="password" id="password" name="password" class="form-input" required>
+            </div>
 
-        <button type="submit" class="submit-btn">
-            <i class="fas fa-paper-plane"></i>
-            送信する
-        </button>
-    </form>
-
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-paper-plane"></i>
+                送信する
+            </button>
+        </form>
+    </div>
 </body>
 
 </html>

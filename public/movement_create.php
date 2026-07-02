@@ -76,46 +76,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>入出荷記録 | 生豆在庫管理</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <!-- 失敗時の$error の中身は $stmt->errorInfo() の配列
-     （exit('送信エラー:' . $error[2]); で $error[2] と添字を付けているのがその証拠）
-     将来この exit を消して画面にエラーを出す作りに変えると、h() は文字列を想定しているので配列を渡すと警告が出ます。
-     今は exit で止まるので実害はない。 -->
-    <?php if (!empty($error)) {
-        echo h($error);
-    } ?>
-    <form action="./movement_create.php" method="post">
-        <label for="bean_id">
-            生豆
-            <select name="bean_id" id="bean_id" required>
-                <?php foreach ($beans as $bean): ?>
-                    <option value="<?= h($bean['id']); ?>"><?= h($bean['name']); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <p class="site-title">生豆在庫管理</p>
+            <nav class="site-nav">
+                <a href="index.php">在庫一覧</a>
+                <a href="movement_create.php">入出荷記録</a>
+                <a href="bean_create.php">生豆登録</a>
+                <a href="logout.php" class="is-danger">ログアウト</a>
+            </nav>
+        </div>
+    </header>
 
-        <label for="type">
-            種類
-            <select name="type" id="type">
-                <option value="in">入荷</option>
-                <option value="reserve">予約</option>
-                <option value="out">販売</option>
-            </select>
-        </label>
+    <div class="container">
+        <h1 class="page-title">入出荷記録</h1>
+        <div class="card">
+            <!-- 失敗時の$error の中身は $stmt->errorInfo() の配列
+             （exit('送信エラー:' . $error[2]); で $error[2] と添字を付けているのがその証拠）
+             将来この exit を消して画面にエラーを出す作りに変えると、h() は文字列を想定しているので配列を渡すと警告が出ます。
+             今は exit で止まるので実害はない。 -->
+            <?php if (!empty($error)) : ?>
+                <p class="error-message"><?= h($error) ?></p>
+            <?php endif; ?>
+            <form action="./movement_create.php" method="post">
+                <div class="form-group">
+                    <label for="bean_id" class="form-label">
+                        生豆
+                        <select name="bean_id" id="bean_id" class="form-input" required>
+                            <?php foreach ($beans as $bean): ?>
+                                <option value="<?= h($bean['id']); ?>"><?= h($bean['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                </div>
 
-        <label for="number">
-            袋数
-            <input type="number" name="bags" id="number" min="1" required>
-        </label>
-        <label for="date">
-            日付
-            <input type="date" name="moved_at" id="date" required>
-        </label>
-        <button type="submit">記録する</button>
-    </form>
+                <div class="form-group">
+                    <label for="type" class="form-label">
+                        種類
+                        <select name="type" id="type" class="form-input">
+                            <option value="in">入荷</option>
+                            <option value="reserve">予約</option>
+                            <option value="out">販売</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="number" class="form-label">
+                        袋数
+                        <input type="number" name="bags" id="number" min="1" class="form-input" required>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="date" class="form-label">
+                        日付
+                        <input type="date" name="moved_at" id="date" class="form-input" required>
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">記録する</button>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

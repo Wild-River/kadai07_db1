@@ -52,60 +52,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>生豆編集 | 生豆在庫管理</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <!-- 失敗時の$error の中身は $stmt->errorInfo() の配列
-     （exit('送信エラー:' . $error[2]); で $error[2] と添字を付けているのがその証拠）
-     将来この exit を消して画面にエラーを出す作りに変えると、h() は文字列を想定しているので配列を渡すと警告が出ます。
-     今は exit で止まるので実害はない。 -->
-    <?php if (!empty($error)) {
-        echo h($error);
-    } ?>
-    <form method="post" action="./bean_edit.php">
-        <div class="form-group">
-            <label for="name" class="form-label">
-                商品名
-                <input type="text" id="name" name="name" value="<?= h($bean['name']) ?>" class="form-input" required>
-            </label>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <p class="site-title">生豆在庫管理</p>
+            <nav class="site-nav">
+                <a href="index.php">在庫一覧</a>
+                <a href="movement_create.php">入出荷記録</a>
+                <a href="bean_create.php">生豆登録</a>
+                <a href="logout.php" class="is-danger">ログアウト</a>
+            </nav>
         </div>
+    </header>
 
-        <div class="form-group">
-            <label for="supplier" class="form-label">
-                仕入先
-                <input type="text" id="supplier" name="supplier" value="<?= h($bean['supplier']) ?>" class="form-input" required>
-            </label>
+    <div class="container">
+        <h1 class="page-title">生豆編集</h1>
+        <div class="card">
+            <!-- 失敗時の$error の中身は $stmt->errorInfo() の配列
+             （exit('送信エラー:' . $error[2]); で $error[2] と添字を付けているのがその証拠）
+             将来この exit を消して画面にエラーを出す作りに変えると、h() は文字列を想定しているので配列を渡すと警告が出ます。
+             今は exit で止まるので実害はない。 -->
+            <?php if (!empty($error)) : ?>
+                <p class="error-message"><?= h($error) ?></p>
+            <?php endif; ?>
+            <form method="post" action="./bean_edit.php">
+                <div class="form-group">
+                    <label for="name" class="form-label">
+                        商品名
+                        <input type="text" id="name" name="name" value="<?= h($bean['name']) ?>" class="form-input" required>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="supplier" class="form-label">
+                        仕入先
+                        <input type="text" id="supplier" name="supplier" value="<?= h($bean['supplier']) ?>" class="form-input" required>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="lot_no" class="form-label">
+                        Lot No.
+                        <input type="text" id="lot_no" name="lot_no" value="<?= h($bean['lot_no']) ?>" class="form-input" required>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="price" class="form-label">
+                        販売定価
+                        <input type="number" id="price" name="price" value="<?= h($bean['price']) ?>" class="form-input" required>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="kg_per_bag" class="form-label">
+                        kg/袋
+                        <input type="number" step="0.01" id="kg_per_bag" name="kg_per_bag" value="<?= h($bean['kg_per_bag']) ?>" class="form-input" required>
+                    </label>
+                </div>
+
+                <!-- 編集対象の id を入れておくと、送信時に $_POST['id'] で受け取れる -->
+                <input type="hidden" name="id" value="<?= h($bean['id']) ?>">
+
+                <button type="submit" class="submit-btn">
+                    送信する
+                </button>
+            </form>
         </div>
-
-        <div class="form-group">
-            <label for="lot_no" class="form-label">
-                Lot No.
-                <input type="text" id="lot_no" name="lot_no" value="<?= h($bean['lot_no']) ?>" class="form-input" required>
-            </label>
-        </div>
-
-        <div class="form-group">
-            <label for="price" class="form-label">
-                販売定価
-                <input type="number" id="price" name="price" value="<?= h($bean['price']) ?>" class="form-input" required>
-            </label>
-        </div>
-
-        <div class="form-group">
-            <label for="kg_per_bag" class="form-label">
-                kg/袋
-                <input type="number" step="0.01" id="kg_per_bag" name="kg_per_bag" value="<?= h($bean['kg_per_bag']) ?>" class="form-input" required>
-            </label>
-        </div>
-
-        <!-- 編集対象の id を入れておくと、送信時に $_POST['id'] で受け取れる -->
-        <input type="hidden" name="id" value="<?= h($bean['id']) ?>">
-
-        <button type="submit" class="submit-btn">
-            送信する
-        </button>
-    </form>
+    </div>
 
 </body>
 

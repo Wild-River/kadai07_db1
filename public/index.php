@@ -40,15 +40,33 @@ $stocks = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>在庫一覧 | 生豆在庫管理</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <form method="get" action="">
-        <input type="text" name="keyword" value="<?= h($keyword) ?>" placeholder="商品名・仕入先で検索">
-        <button type="submit">検索</button>
-    </form>
-    <table>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <p class="site-title">生豆在庫管理</p>
+            <nav class="site-nav">
+                <a href="index.php">在庫一覧</a>
+                <a href="movement_create.php">入出荷記録</a>
+                <a href="bean_create.php">生豆登録</a>
+                <a href="logout.php" class="is-danger">ログアウト</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">在庫一覧</h1>
+
+        <form method="get" action="" class="search-form">
+            <input type="text" name="keyword" value="<?= h($keyword) ?>" placeholder="商品名・仕入先で検索">
+            <button type="submit">検索</button>
+        </form>
+
+        <div class="table-wrapper">
+        <table>
         <thead>
             <tr>
                 <th>商品名</th>
@@ -86,17 +104,19 @@ $stocks = $stmt->fetchAll();
                     <td><?= h($zaiko) ?></td>
                     <td><?= h($zaikoKg) ?></td>
                     <td><?= h($mishukka) ?></td>
-                    <td>
-                        <a href="bean_edit.php?id=<?= h($stock['id']) ?>">編集</a>
-                        <form method="post" action="bean_delete.php" style="display:inline;">
+                    <td class="actions-cell">
+                        <a href="bean_edit.php?id=<?= h($stock['id']) ?>" class="btn-link">編集</a>
+                        <form method="post" action="bean_delete.php" class="inline-form">
                             <input type="hidden" name="id" value="<?= h($stock['id']) ?>">
-                            <button type="submit" onclick="return confirm('削除しますか？');">削除</button>
+                            <button type="submit" class="btn-link" onclick="return confirm('削除しますか？');">削除</button>
                         </form>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
-    </table>
+        </table>
+        </div>
+    </div>
 
 </body>
 
