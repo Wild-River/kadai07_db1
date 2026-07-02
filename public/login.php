@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
@@ -51,19 +51,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="username" class="form-label">
                     <i class="fas fa-user"></i>ユーザー名
                 </label>
-                <input type="text" id="username" name="username" class="form-input" required>
+                <input type="text" id="username" name="username" class="form-input" required autocomplete="off">
             </div>
 
             <div class="form-group">
                 <label for="password" class="form-label">
                     <i class="fas fa-lock"></i>パスワード
                 </label>
-                <input type="password" id="password" name="password" class="form-input" required>
+                <input type="password" id="password" name="password" class="form-input" required autocomplete="off">
             </div>
 
             <button type="submit" class="submit-btn">
-                <i class="fas fa-paper-plane"></i>
-                送信する
+                ログイン
             </button>
         </form>
     </div>

@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group">
                     <label for="kg_per_bag" class="form-label">
                         kg/袋
-                        <input type="number" step="0.01" id="kg_per_bag" name="kg_per_bag" min="0" max="9999" class="form-input" required>
+                        <input type="number" step="1" id="kg_per_bag" name="kg_per_bag" min="0" max="9999" class="form-input" required>
                     </label>
                 </div>
 

@@ -38,7 +38,9 @@ $chartLabels = [];
 $chartShipped = [];
 $chartPending = [];
 $chartUnreserved = [];
+$totalShipped = 0;
 $totalPending = 0;
+$totalUnreserved = 0;
 foreach ($stocks as $stock) {
     $shipped = (int) $stock['total_out'];
     $pending = max((int) $stock['total_reserve'] - $shipped, 0); // 予約したが未出荷の袋数
@@ -47,12 +49,14 @@ foreach ($stocks as $stock) {
     $chartShipped[] = $shipped;
     $chartPending[] = $pending;
     $chartUnreserved[] = $unreserved;
+    $totalShipped += $shipped;
     $totalPending += $pending;
+    $totalUnreserved += $unreserved;
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
@@ -66,13 +70,13 @@ foreach ($stocks as $stock) {
     <?php require_once '../config/header.php'; ?>
 
     <div class="container">
-        <h1 class="page-title">在庫一覧</h1>
-
         <div class="insight-row">
             <div class="card stat-tile">
-                <p class="stat-label">予約中・未出荷</p>
-                <p class="stat-value"><?= h($totalPending) ?><span class="stat-unit">袋</span></p>
-                <p class="stat-note">予約済みだがまだ出荷されていない生豆の合計</p>
+                <div class="section-head">
+                    <p class="section-title">生豆の在庫状況</p>
+                    <p class="stat-note">未予約在庫・予約中・出荷済みの割合</p>
+                </div>
+                <div id="statusDonutChart"></div>
             </div>
             <div class="card chart-card">
                 <div class="section-head">
@@ -84,64 +88,55 @@ foreach ($stocks as $stock) {
         </div>
 
         <form method="get" action="" class="search-form">
-            <input type="text" name="keyword" value="<?= h($keyword) ?>" placeholder="商品名・仕入先で検索">
+            <input type="text" name="keyword" value="<?= h($keyword) ?>" placeholder="商品名・仕入先で検索" autocomplete="off">
             <button type="submit">検索</button>
         </form>
 
         <div class="table-wrapper">
-        <table>
-        <thead>
-            <tr>
-                <th>商品名</th>
-                <th>仕入先</th>
-                <th>Lot No.</th>
-                <th>販売定価</th>
-                <th>kg/袋</th>
-                <th>入荷</th>
-                <th>予約</th>
-                <th>販売</th>
-                <th>在庫数</th>
-                <th>在庫量(kg)</th>
-                <th>未出荷</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($stocks as $stock):
-                // 在庫数 = 入荷 − 販売
-                $zaiko = $stock['total_in'] - $stock['total_out'];
-                $zaikoKg = $zaiko * $stock['kg_per_bag'];
-                $isLow = $zaiko <= 5;   // 在庫5袋以下なら「少ない」とみなす
-                // 未出荷 = 予約 − 販売
-                $mishukka = $stock['total_reserve'] - $stock['total_out'];
-            ?>
-                <tr class="<?= $isLow ? 'low-stock' : '' ?>">
-                    <td><?= h($stock['name']) ?></td>
-                    <td><?= h($stock['supplier']) ?></td>
-                    <td><?= h($stock['lot_no']) ?></td>
-                    <td><?= h($stock['price']) ?></td>
-                    <td><?= h($stock['kg_per_bag']) ?></td>
-                    <td><?= h($stock['total_in']) ?></td>
-                    <td><?= h($stock['total_reserve']) ?></td>
-                    <td><?= h($stock['total_out']) ?></td>
-                    <td><?= h($zaiko) ?></td>
-                    <td><?= h($zaikoKg) ?></td>
-                    <td><?= h($mishukka) ?></td>
-                    <td class="actions-cell">
-                        <a href="bean_edit.php?id=<?= h($stock['id']) ?>" class="icon-btn" title="編集" aria-label="編集">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        <form method="post" action="bean_delete.php" class="inline-form">
-                            <input type="hidden" name="id" value="<?= h($stock['id']) ?>">
-                            <button type="submit" class="icon-btn icon-btn-danger" title="削除" aria-label="削除" onclick="return confirm('削除しますか？');">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-        </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>商品名</th>
+                        <th>仕入先</th>
+                        <th>Lot No.</th>
+                        <th>販売定価</th>
+                        <th>kg/袋</th>
+                        <th>入荷</th>
+                        <th>予約</th>
+                        <th>販売</th>
+                        <th>在庫数</th>
+                        <th>未出荷</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($stocks as $stock):
+                        // 在庫数 = 入荷 − 販売
+                        $zaiko = $stock['total_in'] - $stock['total_out'];
+                        $isLow = $zaiko <= 5;   // 在庫5袋以下なら「少ない」とみなす
+                        // 未出荷 = 予約 − 販売
+                        $mishukka = $stock['total_reserve'] - $stock['total_out'];
+                    ?>
+                        <tr class="<?= $isLow ? 'low-stock' : '' ?>">
+                            <td><?= h($stock['name']) ?></td>
+                            <td><?= h($stock['supplier']) ?></td>
+                            <td><?= h($stock['lot_no']) ?></td>
+                            <td><?= h(number_format($stock['price'])) ?></td>
+                            <td><?= h($stock['kg_per_bag']) ?></td>
+                            <td><?= h($stock['total_in']) ?></td>
+                            <td><?= h($stock['total_reserve']) ?></td>
+                            <td><?= h($stock['total_out']) ?></td>
+                            <td><?= h($zaiko) ?></td>
+                            <td><?= h($mishukka) ?></td>
+                            <td class="actions-cell">
+                                <a href="bean_edit.php?id=<?= h($stock['id']) ?>" class="icon-btn" title="編集" aria-label="編集">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -150,6 +145,9 @@ foreach ($stocks as $stock) {
         const chartShipped = <?= json_encode($chartShipped) ?>;
         const chartPending = <?= json_encode($chartPending) ?>;
         const chartUnreserved = <?= json_encode($chartUnreserved) ?>;
+        const totalShipped = <?= json_encode($totalShipped) ?>;
+        const totalPending = <?= json_encode($totalPending) ?>;
+        const totalUnreserved = <?= json_encode($totalUnreserved) ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="js/chart.js"></script>

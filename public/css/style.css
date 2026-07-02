@@ -12,11 +12,8 @@
   --color-primary: #2f5b45;
   --color-primary-dark: #234736;
 
-  --color-danger: #c0392b;
-  --color-danger-dark: #a3291c;
-
-  --color-low-stock-bg: #fdeceb;
-  --color-low-stock-text: #b23b3b;
+  --color-low-stock-bg: #ecf0ec;
+  --color-danger: #b23b3b;
 
   /* グラフ・進行段階の表現に使う緑の単色ランプ（淡→濃） */
   --color-stage-1: #94bda5;
@@ -33,8 +30,7 @@
 
 body {
   margin: 0;
-  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
-    Meiryo, sans-serif;
+  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
@@ -113,7 +109,6 @@ a:hover {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
   padding: 24px;
 }
 
@@ -127,39 +122,21 @@ a:hover {
 }
 
 .stat-tile {
-  flex: 0 0 220px;
+  flex: 0 0 280px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-}
-
-.stat-label {
-  margin: 0 0 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-muted);
-}
-
-.stat-value {
-  margin: 0 0 8px;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: var(--color-stage-2);
-  line-height: 1;
-}
-
-.stat-value .stat-unit {
-  margin-left: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-muted);
+  justify-content: top;
 }
 
 .stat-note {
-  margin: 0;
+  margin: 8px 0 16px;
   font-size: 0.8rem;
   color: var(--color-muted);
   line-height: 1.5;
+}
+
+#statusDonutChart {
+  max-width: 100%;
 }
 
 .chart-card {
@@ -206,7 +183,7 @@ a:hover {
   margin-bottom: 20px;
 }
 
-.search-form input[type="text"] {
+.search-form input[type='text'] {
   flex: 1;
   max-width: 320px;
   padding: 8px 12px;
@@ -246,7 +223,7 @@ thead th {
   background-color: var(--color-bg);
   color: var(--color-muted);
   font-weight: 600;
-  text-align: left;
+  text-align: center;
   padding: 10px 12px;
   border-bottom: 2px solid var(--color-border);
   white-space: nowrap;
@@ -266,46 +243,18 @@ tbody tr.low-stock {
   background-color: var(--color-low-stock-bg);
 }
 
-tbody tr.low-stock:hover {
-  background-color: #fbdedc;
-}
+/* tbody tr.low-stock:hover {
+  background-color: #dcdcdc;
+} */
 
 tbody tr.low-stock td {
-  color: var(--color-low-stock-text);
+  color: var(--color-primary);
 }
 
 .actions-cell {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-/* ----- Buttons ----- */
-
-.btn {
-  display: inline-block;
-  padding: 8px 18px;
-  border: none;
-  border-radius: var(--radius);
-  background-color: var(--color-primary);
-  color: #fff;
-  font-size: 0.95rem;
-  cursor: pointer;
-  text-align: center;
-}
-
-.btn:hover {
-  background-color: var(--color-primary-dark);
-  text-decoration: none;
-  color: #fff;
-}
-
-.btn-danger {
-  background-color: var(--color-danger);
-}
-
-.btn-danger:hover {
-  background-color: var(--color-danger-dark);
 }
 
 /* ----- Icon buttons (edit / delete / logout) ----- */
@@ -323,7 +272,9 @@ tbody tr.low-stock td {
   font-size: 0.85rem;
   line-height: 1;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease,
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
     border-color 0.15s ease;
 }
 
@@ -332,21 +283,6 @@ tbody tr.low-stock td {
   color: var(--color-primary);
   border-color: var(--color-primary);
   text-decoration: none;
-}
-
-.icon-btn-danger {
-  color: var(--color-danger);
-  border-color: #f2c6c2;
-}
-
-.icon-btn-danger:hover {
-  background-color: var(--color-danger);
-  color: #fff;
-  border-color: var(--color-danger);
-}
-
-.inline-form {
-  display: inline;
 }
 
 /* ----- Forms ----- */
@@ -407,6 +343,50 @@ select.form-input {
   background-color: var(--color-primary-dark);
 }
 
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  background-color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.delete-btn:hover {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: #fff;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 8px;
+  margin-left: auto; /* ← これで右端に押し出される */
+}
+
+.back-btn:hover {
+  background-color: var(--color-bg);
+  text-decoration: none;
+}
+
 /* ----- Login page ----- */
 
 .login-page {
@@ -423,7 +403,6 @@ select.form-input {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
   padding: 32px;
 }
 
@@ -443,7 +422,7 @@ select.form-input {
 
 .error-message {
   background-color: var(--color-low-stock-bg);
-  color: var(--color-low-stock-text);
+  color: var(--color-danger);
   border: 1px solid #f2c6c2;
   border-radius: var(--radius);
   padding: 10px 14px;

@@ -2,6 +2,54 @@
 // 進行段階を表す。1つの色相・単調な明度差でordinalチェックを通過済みの3色。
 const stageColors = ['#94bda5', '#5c9179', '#2f5b45'];
 
+new ApexCharts(document.querySelector('#statusDonutChart'), {
+    chart: {
+        type: 'donut',
+        height: 260,
+        fontFamily: 'inherit'
+    },
+    series: [totalUnreserved, totalPending, totalShipped],
+    labels: ['未予約在庫', '予約中・未出荷', '出荷済み'],
+    colors: stageColors,
+    stroke: { width: 2, colors: ['#ffffff'] },
+    legend: { position: 'bottom', fontSize: '12px' },
+    dataLabels: {
+        enabled: true,
+        formatter: (val) => Math.round(val) + '%'
+    },
+    plotOptions: {
+        pie: {
+            donut: {
+                size: '65%',
+                labels: {
+                    show: true,
+                    name: { show: true, fontSize: '13px' },
+                    value: {
+                        show: true,
+                        fontSize: '20px',
+                        fontWeight: 700,
+                        formatter: (val) => val + ' 袋'
+                    },
+                    total: {
+                        show: true,
+                        label: '予約中・未出荷',
+                        fontSize: '14px',
+                        color: '#5c9179',
+                        formatter: () => totalPending + ' 袋'
+                    }
+                }
+            }
+        }
+    },
+    tooltip: {
+        y: { formatter: (val) => val + ' 袋' }
+    },
+    states: {
+        hover: { filter: { type: 'none' } },
+        active: { filter: { type: 'none' } }
+    }
+}).render();
+
 new ApexCharts(document.querySelector('#stockChart'), {
     chart: {
         type: 'bar',

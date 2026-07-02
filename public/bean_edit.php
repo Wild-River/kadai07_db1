@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if (!empty($error)) : ?>
                 <p class="error-message"><?= h($error) ?></p>
             <?php endif; ?>
-            <form method="post" action="./bean_edit.php">
+            <form method="post" action="./bean_edit.php" id="edit-form">
                 <div class="form-group">
                     <label for="name" class="form-label">
                         商品名
@@ -102,17 +102,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group">
                     <label for="kg_per_bag" class="form-label">
                         kg/袋
-                        <input type="number" step="0.01" id="kg_per_bag" name="kg_per_bag" value="<?= h($bean['kg_per_bag']) ?>" class="form-input" required>
+                        <input type="number" step="1" id="kg_per_bag" name="kg_per_bag" value="<?= h($bean['kg_per_bag']) ?>" class="form-input" required>
                     </label>
                 </div>
 
                 <!-- 編集対象の id を入れておくと、送信時に $_POST['id'] で受け取れる -->
                 <input type="hidden" name="id" value="<?= h($bean['id']) ?>">
-
-                <button type="submit" class="submit-btn">
-                    送信する
-                </button>
             </form>
+
+            <div class="form-actions">
+                <!-- form="フォームのid"を付けると、ボタンがフォームの外にあっても指定したidのフォームに紐づけて送信できる -->
+                <button type="submit" form="edit-form" class="submit-btn">
+                    決定
+                </button>
+
+                <form method="post" action="bean_delete.php" onsubmit="return confirm('削除しますか？');">
+                    <input type="hidden" name="id" value="<?= h($bean['id']) ?>">
+                    <button type="submit" class="delete-btn">
+                        削除
+                    </button>
+                </form>
+
+                <a href="index.php" class="back-btn">戻る</a>
+            </div>
+
         </div>
     </div>
 
