@@ -73,8 +73,8 @@ foreach ($stocks as $stock) {
         <div class="insight-row">
             <div class="card stat-tile">
                 <div class="section-head">
-                    <p class="section-title">生豆の在庫状況</p>
-                    <p class="stat-note">未予約在庫・予約中・出荷済みの割合</p>
+                    <p class="section-title">現在の在庫状況</p>
+                    <p class="stat-note">未予約・予約中・出荷済みの割合</p>
                 </div>
                 <div id="statusDonutChart"></div>
             </div>
