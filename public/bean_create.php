@@ -37,21 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>生豆登録 | 生豆在庫管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <header class="site-header">
-        <div class="site-header__inner">
-            <p class="site-title">生豆在庫管理</p>
-            <nav class="site-nav">
-                <a href="index.php">在庫一覧</a>
-                <a href="movement_create.php">入出荷記録</a>
-                <a href="bean_create.php">生豆登録</a>
-                <a href="logout.php" class="is-danger">ログアウト</a>
-            </nav>
-        </div>
-    </header>
+    <?php require_once '../config/header.php'; ?>
 
     <div class="container">
         <h1 class="page-title">生豆登録</h1>

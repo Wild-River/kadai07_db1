@@ -32,6 +32,23 @@ if ($keyword !== '') {
 }
 $stmt->execute();
 $stocks = $stmt->fetchAll();
+
+// グラフ・サマリー用の集計（入荷袋数を「出荷済み」「予約中・未出荷」「未予約在庫」に分解）
+$chartLabels = [];
+$chartShipped = [];
+$chartPending = [];
+$chartUnreserved = [];
+$totalPending = 0;
+foreach ($stocks as $stock) {
+    $shipped = (int) $stock['total_out'];
+    $pending = max((int) $stock['total_reserve'] - $shipped, 0); // 予約したが未出荷の袋数
+    $unreserved = max((int) $stock['total_in'] - $shipped - $pending, 0);
+    $chartLabels[] = $stock['name'];
+    $chartShipped[] = $shipped;
+    $chartPending[] = $pending;
+    $chartUnreserved[] = $unreserved;
+    $totalPending += $pending;
+}
 ?>
 
 <!DOCTYPE html>
@@ -41,24 +58,30 @@ $stocks = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>在庫一覧 | 生豆在庫管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <header class="site-header">
-        <div class="site-header__inner">
-            <p class="site-title">生豆在庫管理</p>
-            <nav class="site-nav">
-                <a href="index.php">在庫一覧</a>
-                <a href="movement_create.php">入出荷記録</a>
-                <a href="bean_create.php">生豆登録</a>
-                <a href="logout.php" class="is-danger">ログアウト</a>
-            </nav>
-        </div>
-    </header>
+    <?php require_once '../config/header.php'; ?>
 
     <div class="container">
         <h1 class="page-title">在庫一覧</h1>
+
+        <div class="insight-row">
+            <div class="card stat-tile">
+                <p class="stat-label">予約中・未出荷</p>
+                <p class="stat-value"><?= h($totalPending) ?><span class="stat-unit">袋</span></p>
+                <p class="stat-note">予約済みだがまだ出荷されていない生豆の合計</p>
+            </div>
+            <div class="card chart-card">
+                <div class="section-head">
+                    <p class="section-title">生豆別 入荷内訳</p>
+                    <p class="section-sub">入荷袋数を「出荷済み」「予約中・未出荷」「未予約在庫」に分解</p>
+                </div>
+                <div id="stockChart"></div>
+            </div>
+        </div>
 
         <form method="get" action="" class="search-form">
             <input type="text" name="keyword" value="<?= h($keyword) ?>" placeholder="商品名・仕入先で検索">
@@ -105,10 +128,14 @@ $stocks = $stmt->fetchAll();
                     <td><?= h($zaikoKg) ?></td>
                     <td><?= h($mishukka) ?></td>
                     <td class="actions-cell">
-                        <a href="bean_edit.php?id=<?= h($stock['id']) ?>" class="btn-link">編集</a>
+                        <a href="bean_edit.php?id=<?= h($stock['id']) ?>" class="icon-btn" title="編集" aria-label="編集">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
                         <form method="post" action="bean_delete.php" class="inline-form">
                             <input type="hidden" name="id" value="<?= h($stock['id']) ?>">
-                            <button type="submit" class="btn-link" onclick="return confirm('削除しますか？');">削除</button>
+                            <button type="submit" class="icon-btn icon-btn-danger" title="削除" aria-label="削除" onclick="return confirm('削除しますか？');">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </form>
                     </td>
                 </tr>
@@ -118,6 +145,14 @@ $stocks = $stmt->fetchAll();
         </div>
     </div>
 
+    <script>
+        const chartLabels = <?= json_encode($chartLabels, JSON_UNESCAPED_UNICODE) ?>;
+        const chartShipped = <?= json_encode($chartShipped) ?>;
+        const chartPending = <?= json_encode($chartPending) ?>;
+        const chartUnreserved = <?= json_encode($chartUnreserved) ?>;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="js/chart.js"></script>
 </body>
 
 </html>
