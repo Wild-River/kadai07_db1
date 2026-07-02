@@ -1,6 +1,6 @@
     <header class="site-header">
         <div class="site-header__inner">
-            <h1 class="site-title">コーヒー生豆在庫管理</h1>
+            <h1 class="site-title"><a href="index.php">コーヒー生豆在庫管理</a></h1>
             <nav class="site-nav">
                 <a href="index.php">在庫一覧</a>
                 <a href="movement_create.php">入出荷記録</a>
