@@ -9,12 +9,33 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $beans = $stmt->fetchAll();
 
+$sql = 'SELECT id, name, company FROM customers ORDER BY name';
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$customers = $stmt->fetchAll();
+
+$sql = 'SELECT stock_movements.type, stock_movements.bags, stock_movements.moved_at, beans.name,
+        customers.name AS customer_name, customers.company AS customer_company
+        FROM stock_movements
+        JOIN beans ON stock_movements.bean_id = beans.id
+        LEFT JOIN customers ON stock_movements.customer_id = customers.id
+        ORDER BY stock_movements.moved_at DESC';
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$movements = $stmt->fetchAll();
+
+$typeLabels = typeLabels();
+
 // POST（記録を送信したとき）
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $beanId = $_POST['bean_id'];
     $type = $_POST['type'];
     $bags = $_POST['bags'];
     $movedAt = $_POST['moved_at'];
+    // 入荷（in）は顧客と無関係なので customer_id は常にNULL
+    $customerId = ($type === 'reserve' || $type === 'out') && !empty($_POST['customer_id'])
+        ? $_POST['customer_id']
+        : null;
 
     if ($type === 'out' || $type === 'reserve') {
         $sql = "SELECT
@@ -50,10 +71,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($error)) {
-        $sql = 'INSERT INTO stock_movements (bean_id, type, bags, moved_at)
-            VALUES (:bean_id, :type, :bags, :moved_at)';
+        $sql = 'INSERT INTO stock_movements (bean_id, customer_id, type, bags, moved_at)
+            VALUES (:bean_id, :customer_id, :type, :bags, :moved_at)';
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':bean_id', $beanId, PDO::PARAM_INT);
+        $stmt->bindValue(':customer_id', $customerId, $customerId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
         $stmt->bindValue(':type', $type, PDO::PARAM_STR);
         $stmt->bindValue(':bags', $bags, PDO::PARAM_INT);
         $stmt->bindValue(':moved_at', $movedAt, PDO::PARAM_STR);
@@ -87,10 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <h1 class="page-title">入出荷記録</h1>
         <div class="card">
-            <!-- 失敗時の$error の中身は $stmt->errorInfo() の配列
-             （exit('送信エラー:' . $error[2]); で $error[2] と添字を付けているのがその証拠）
-             将来この exit を消して画面にエラーを出す作りに変えると、h() は文字列を想定しているので配列を渡すと警告が出ます。
-             今は exit で止まるので実害はない。 -->
             <?php if (!empty($error)) : ?>
                 <p class="error-message"><?= h($error) ?></p>
             <?php endif; ?>
@@ -117,6 +135,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </label>
                 </div>
 
+                <div class="form-group" id="customer_group" style="display:none;">
+                    <label for="customer_id" class="form-label">
+                        顧客
+                        <select name="customer_id" id="customer_id" class="form-input">
+                            <option value="">選択してください</option>
+                            <?php foreach ($customers as $customer): ?>
+                                <option value="<?= h($customer['id']); ?>">
+                                    <?= h($customer['name']); ?><?= $customer['company'] ? '（' . h($customer['company']) . '）' : ''; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                </div>
+
                 <div class="form-group">
                     <label for="number" class="form-label">
                         袋数
@@ -134,7 +166,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="submit-btn">記録する</button>
             </form>
         </div>
+
+        <div class="table-wrapper">
+            <?php if (empty($movements)) : ?>
+                <p>記録がありません</p>
+            <?php else : ?>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>日付</th>
+                            <th>生豆</th>
+                            <th>種類</th>
+                            <th>袋数</th>
+                            <th>顧客</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($movements as $movement) : ?>
+                            <tr>
+                                <td><?= h($movement['moved_at']) ?></td>
+                                <td><?= h($movement['name']) ?></td>
+                                <td><?= h($typeLabels[$movement['type']]) ?></td>
+                                <td><?= h($movement['bags']) ?></td>
+                                <td>
+                                    <?php if ($movement['customer_name']) : ?>
+                                        <?= h($movement['customer_name']) ?><?= $movement['customer_company'] ? '（' . h($movement['customer_company']) . '）' : '' ?>
+                                    <?php else : ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </div>
+
+
     </div>
+
+    <script>
+        const typeSelect = document.getElementById('type');
+        const customerGroup = document.getElementById('customer_group');
+        const customerSelect = document.getElementById('customer_id');
+
+        function toggleCustomerField() {
+            const needsCustomer = typeSelect.value === 'reserve' || typeSelect.value === 'out';
+            customerGroup.style.display = needsCustomer ? '' : 'none';
+            if (!needsCustomer) {
+                customerSelect.value = '';
+            }
+        }
+
+        typeSelect.addEventListener('change', toggleCustomerField);
+        toggleCustomerField();
+    </script>
 </body>
 
 </html>

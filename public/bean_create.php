@@ -47,10 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <h1 class="page-title">生豆登録</h1>
         <div class="card">
-            <!-- 失敗時の$error の中身は $stmt->errorInfo() の配列
-             （exit('送信エラー:' . $error[2]); で $error[2] と添字を付けているのがその証拠）
-             将来この exit を消して画面にエラーを出す作りに変えると、h() は文字列を想定しているので配列を渡すと警告が出ます。
-             今は exit で止まるので実害はない。 -->
             <?php if (!empty($error)) : ?>
                 <p class="error-message"><?= h($error) ?></p>
             <?php endif; ?>

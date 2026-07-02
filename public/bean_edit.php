@@ -3,6 +3,8 @@ require_once '../config/auth.php';
 require_once '../config/db.php';
 require_once '../config/func.php';
 
+$typeLabels = typeLabels();
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // URLの ?id=◯ から id を受け取る
     $id = $_GET['id'];
@@ -13,6 +15,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
     $bean = $stmt->fetch();
+
+    $sql = 'SELECT stock_movements.type, stock_movements.bags, stock_movements.moved_at,
+            customers.name AS customer_name, customers.company AS customer_company
+            FROM stock_movements
+            LEFT JOIN customers ON stock_movements.customer_id = customers.id
+            WHERE stock_movements.bean_id = :id
+            ORDER BY stock_movements.moved_at DESC';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $movements = $stmt->fetchAll();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -63,11 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <h1 class="page-title">生豆編集</h1>
         <div class="card">
-            <!-- 失敗時の$error の中身は $stmt->errorInfo() の配列
-             （exit('送信エラー:' . $error[2]); で $error[2] と添字を付けているのがその証拠）
-             将来この exit を消して画面にエラーを出す作りに変えると、h() は文字列を想定しているので配列を渡すと警告が出ます。
-             今は exit で止まるので実害はない。 -->
-            <?php if (!empty($error)) : ?>
+            <?php if (!empty($error)): ?>
                 <p class="error-message"><?= h($error) ?></p>
             <?php endif; ?>
             <form method="post" action="./bean_edit.php" id="edit-form">
@@ -126,7 +135,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="index.php" class="back-btn">戻る</a>
             </div>
 
+            <div class="table-wrapper">
+                <?php if (empty($movements)): ?>
+                    <p>記録がありません</p>
+                <?php else: ?>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>日付</th>
+                                <th>種類</th>
+                                <th>袋数</th>
+                                <th>顧客</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($movements as $movement): ?>
+                                <tr>
+                                    <td><?= h($movement['moved_at']) ?></td>
+                                    <td><?= h($typeLabels[$movement['type']]) ?></td>
+                                    <td><?= h($movement['bags']) ?></td>
+                                    <td>
+                                        <?php if ($movement['customer_name']) : ?>
+                                            <?= h($movement['customer_name']) ?><?= $movement['customer_company'] ? '（' . h($movement['customer_company']) . '）' : '' ?>
+                                        <?php else : ?>
+                                            -
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
         </div>
+
+
     </div>
 
 </body>

@@ -210,6 +210,7 @@ a:hover {
 
 .table-wrapper {
   overflow-x: auto;
+  margin-top: 60px;
 }
 
 table {
@@ -223,7 +224,7 @@ thead th {
   background-color: var(--color-bg);
   color: var(--color-muted);
   font-weight: 600;
-  text-align: center;
+  text-align: left;
   padding: 10px 12px;
   border-bottom: 2px solid var(--color-border);
   white-space: nowrap;
