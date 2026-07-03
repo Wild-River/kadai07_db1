@@ -3,7 +3,18 @@ require_once '../config/auth.php';
 require_once '../config/db.php';
 require_once '../config/func.php';
 
-// GET/POST どちらでも、selectの選択肢は必要なので常に引く
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // URLの ?id=◯ から id を受け取る
+    $id = $_GET['id'];
+
+    // その id で movement から1件引く
+    $sql = 'SELECT id, bean_id, customer_id, type, bags, moved_at FROM stock_movements WHERE id = :id';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $movement = $stmt->fetch();
+}
+
 $sql = 'SELECT id, name FROM beans ORDER BY name';
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
@@ -14,7 +25,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $customers = $stmt->fetchAll();
 
-$sql = 'SELECT stock_movements.id, stock_movements.type, stock_movements.bags, stock_movements.moved_at, beans.name,
+$sql = 'SELECT stock_movements.type, stock_movements.bags, stock_movements.moved_at, beans.name,
         customers.name AS customer_name, customers.company AS customer_company
         FROM stock_movements
         JOIN beans ON stock_movements.bean_id = beans.id
@@ -28,6 +39,7 @@ $typeLabels = typeLabels();
 
 // POST（記録を送信したとき）
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id'];
     $beanId = $_POST['bean_id'];
     $type = $_POST['type'];
     $bags = $_POST['bags'];
@@ -38,14 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         : null;
 
     if ($type === 'out' || $type === 'reserve') {
+        // 自分自身(id)を除外して他の記録だけを集計する
         $sql = "SELECT
             SUM(CASE WHEN type = 'in'      THEN bags ELSE 0 END) AS total_in,
             SUM(CASE WHEN type = 'reserve' THEN bags ELSE 0 END) AS total_reserve,
             SUM(CASE WHEN type = 'out'     THEN bags ELSE 0 END) AS total_out
         FROM stock_movements
-        WHERE bean_id = :bean_id";
+        WHERE bean_id = :bean_id AND id != :id";
 
         $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->bindValue(':bean_id', $beanId, PDO::PARAM_INT);
         $status = $stmt->execute();
         $row = $stmt->fetch();
@@ -71,9 +85,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($error)) {
-        $sql = 'INSERT INTO stock_movements (bean_id, customer_id, type, bags, moved_at)
-            VALUES (:bean_id, :customer_id, :type, :bags, :moved_at)';
+        $sql = 'UPDATE stock_movements SET bean_id = :bean_id, customer_id = :customer_id, type = :type, bags = :bags, moved_at = :moved_at
+            WHERE id = :id';
         $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->bindValue(':bean_id', $beanId, PDO::PARAM_INT);
         $stmt->bindValue(':customer_id', $customerId, $customerId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
         $stmt->bindValue(':type', $type, PDO::PARAM_STR);
@@ -86,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = $stmt->errorInfo();
             exit('送信エラー:' . $error[2]);
         }
-        header('Location: index.php');
+        header('Location: movement_create.php');
         exit;
     }
 }
@@ -112,13 +127,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if (!empty($error)) : ?>
                 <p class="error-message"><?= h($error) ?></p>
             <?php endif; ?>
-            <form action="./movement_create.php" method="post">
+            <form action="./movement_edit.php" method="post" id="edit-form">
                 <div class="form-group">
                     <label for="bean_id" class="form-label">
                         生豆
                         <select name="bean_id" id="bean_id" class="form-input" required>
                             <?php foreach ($beans as $bean): ?>
-                                <option value="<?= h($bean['id']); ?>"><?= h($bean['name']); ?></option>
+                                <option value="<?= h($bean['id']); ?>" <?= $bean['id'] == $movement['bean_id'] ? 'selected' : '' ?>>
+                                    <?= h($bean['name']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </label>
@@ -128,9 +145,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="type" class="form-label">
                         種類
                         <select name="type" id="type" class="form-input">
-                            <option value="in">入荷</option>
-                            <option value="reserve">予約</option>
-                            <option value="out">販売</option>
+                            <option value="in" <?= $movement['type'] === 'in' ? 'selected' : '' ?>>入荷</option>
+                            <option value="reserve" <?= $movement['type'] === 'reserve' ? 'selected' : '' ?>>予約</option>
+                            <option value="out" <?= $movement['type'] === 'out' ? 'selected' : '' ?>>販売</option>
                         </select>
                     </label>
                 </div>
@@ -141,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <select name="customer_id" id="customer_id" class="form-input">
                             <option value="">選択してください</option>
                             <?php foreach ($customers as $customer): ?>
-                                <option value="<?= h($customer['id']); ?>">
+                                <option value="<?= h($customer['id']); ?>" <?= $customer['id'] == $movement['customer_id'] ? 'selected' : '' ?>>
                                     <?= h($customer['name']); ?><?= $customer['company'] ? '（' . h($customer['company']) . '）' : ''; ?>
                                 </option>
                             <?php endforeach; ?>
@@ -163,52 +180,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </label>
                 </div>
 
-                <button type="submit" class="submit-btn">記録する</button>
+                <input type="hidden" name="id" value="<?= h($movement['id']) ?>">
+
             </form>
+
+            <div class="form-actions">
+                <!-- form="フォームのid"を付けると、ボタンがフォームの外にあっても指定したidのフォームに紐づけて送信できる -->
+                <button type="submit" form="edit-form" class="submit-btn">変更</button>
+
+                <form method="post" action="movement_delete.php" onsubmit="return confirm('削除しますか？');">
+                    <input type="hidden" name="id" value="<?= h($movement['id']) ?>">
+                    <button type="submit" class="delete-btn">削除</button>
+                </form>
+
+                <a href="movement_create.php" class="back-btn">戻る</a>
+            </div>
         </div>
-
-        <div class="table-wrapper">
-            <?php if (empty($movements)) : ?>
-                <p>記録がありません</p>
-            <?php else : ?>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>日付</th>
-                            <th>生豆</th>
-                            <th>種類</th>
-                            <th>袋数</th>
-                            <th>顧客</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($movements as $movement) : ?>
-                            <tr>
-                                <td><?= h($movement['moved_at']) ?></td>
-                                <td><?= h($movement['name']) ?></td>
-                                <td><?= h($typeLabels[$movement['type']]) ?></td>
-                                <td><?= h($movement['bags']) ?></td>
-                                <td>
-                                    <?php if ($movement['customer_name']) : ?>
-                                        <?= h($movement['customer_name']) ?><?= $movement['customer_company'] ? '（' . h($movement['customer_company']) . '）' : '' ?>
-                                    <?php else : ?>
-                                        -
-                                    <?php endif; ?>
-                                </td>
-                                <td class="actions-cell">
-                                    <a href="movement_edit.php?id=<?= h($movement['id']) ?>" class="icon-btn" title="編集" aria-label="編集">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
-        </div>
-
-
     </div>
 
     <script>

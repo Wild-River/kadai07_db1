@@ -76,19 +76,74 @@ a {
 .site-nav {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
-.site-nav a:not(.icon-btn) {
+.site-nav a {
   color: var(--color-text);
   padding: 6px 10px;
   border-radius: var(--radius);
   font-size: 0.9rem;
 }
 
-.site-nav a:not(.icon-btn):hover {
+.site-nav > a:hover,
+.nav-dropdown a:hover {
   background-color: var(--color-bg);
   text-decoration: none;
+}
+
+/* 親子関係を持つナビ項目（クリックで子メニューを開閉） */
+.nav-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  padding: 2px 4px;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  font-size: 1.25em;
+  opacity: 0.6;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: transform 0.2s ease;
+}
+
+.nav-toggle[aria-expanded='true'] {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  display: none;
+  flex-direction: column;
+  min-width: 140px;
+  margin-top: 4px;
+  padding: 6px;
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.nav-dropdown a:hover {
+  background-color: var(--color-bg);
+}
+
+.nav-group.open .nav-dropdown {
+  display: flex;
+}
+
+.nav-dropdown a {
+  white-space: nowrap;
 }
 
 /* ----- Page heading ----- */
@@ -306,6 +361,7 @@ tbody tr.low-stock td {
   max-width: 360px;
   padding: 9px 12px;
   margin-top: 4px;
+  margin-left: 4px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   font-size: 0.95rem;

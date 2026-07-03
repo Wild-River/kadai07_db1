@@ -111,8 +111,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     決定
                 </button>
 
+                <form method="post" action="customer_delete.php" onsubmit="return confirm('削除しますか？');">
+                    <input type="hidden" name="id" value="<?= h($customer['id']) ?>">
+                    <button type="submit" class="delete-btn">
+                        削除
+                    </button>
+                </form>
+
                 <a href="customer_list.php" class="back-btn">戻る</a>
             </div>
+
         </div>
     </div>
 

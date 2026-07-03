@@ -16,11 +16,13 @@ $sql = "SELECT
             SUM(CASE WHEN type = 'reserve' THEN bags ELSE 0 END) AS total_reserve,
             SUM(CASE WHEN type = 'out'     THEN bags ELSE 0 END) AS total_out
         FROM beans
+        --  LEFT JOIN にすると「beans に登録されている生豆は、履歴が無くても必ず表示される（在庫0として）」
         LEFT JOIN stock_movements ON beans.id = stock_movements.bean_id";
 
 if ($keyword !== '') {
     // .= で文字列を組み立てるときは「継ぎ目でスペースが1個は入るようにする」のが鉄則（最初と最後に入れてある）
-    $sql .= " WHERE beans.name LIKE :keyword OR beans.supplier LIKE :keyword ";
+    // EMULATE_PREPARES が false なので、同じ名前のプレースホルダを2箇所で使うことはできない
+    $sql .= " WHERE beans.name LIKE :keyword1 OR beans.supplier LIKE :keyword2 ";
 }
 
 $sql .= " GROUP BY beans.id, beans.name, beans.supplier, beans.lot_no, beans.price, beans.kg_per_bag
@@ -28,7 +30,8 @@ $sql .= " GROUP BY beans.id, beans.name, beans.supplier, beans.lot_no, beans.pri
 
 $stmt = $pdo->prepare($sql);
 if ($keyword !== '') {
-    $stmt->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
+    $stmt->bindValue(':keyword1', '%' . $keyword . '%', PDO::PARAM_STR);
+    $stmt->bindValue(':keyword2', '%' . $keyword . '%', PDO::PARAM_STR);
 }
 $stmt->execute();
 $stocks = $stmt->fetchAll();
@@ -97,6 +100,7 @@ foreach ($stocks as $stock) {
                 <thead>
                     <tr>
                         <th>商品名</th>
+                        <th></th>
                         <th>仕入先</th>
                         <th>Lot No.</th>
                         <th>販売定価</th>
@@ -106,7 +110,6 @@ foreach ($stocks as $stock) {
                         <th>販売</th>
                         <th>在庫数</th>
                         <th>未出荷</th>
-                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -119,6 +122,11 @@ foreach ($stocks as $stock) {
                     ?>
                         <tr class="<?= $isLow ? 'low-stock' : '' ?>">
                             <td><?= h($stock['name']) ?></td>
+                            <td class="actions-cell">
+                                <a href="bean_edit.php?id=<?= h($stock['id']) ?>" class="icon-btn" title="編集" aria-label="編集">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                            </td>
                             <td><?= h($stock['supplier']) ?></td>
                             <td><?= h($stock['lot_no']) ?></td>
                             <td><?= h(number_format($stock['price'])) ?></td>
@@ -128,11 +136,6 @@ foreach ($stocks as $stock) {
                             <td><?= h($stock['total_out']) ?></td>
                             <td><?= h($zaiko) ?></td>
                             <td><?= h($mishukka) ?></td>
-                            <td class="actions-cell">
-                                <a href="bean_edit.php?id=<?= h($stock['id']) ?>" class="icon-btn" title="編集" aria-label="編集">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
