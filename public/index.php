@@ -25,8 +25,27 @@ if ($keyword !== '') {
     $sql .= " WHERE beans.name LIKE :keyword1 OR beans.supplier LIKE :keyword2 ";
 }
 
+$sortableColumns = [
+    'name'          => 'beans.name',
+    'supplier'      => 'beans.supplier',
+    'lot_no'         => 'beans.lot_no',
+    'price'         => 'beans.price',
+    'kg_per_bag'    => 'beans.kg_per_bag',
+    'total_in'      => 'total_in',      // SELECTのエイリアスはORDER BYでそのまま使える
+    'total_reserve' => 'total_reserve',
+    'total_out'     => 'total_out',
+    'zaiko'         => '(total_in - total_out)',        // 在庫数（計算列）
+    'mishukka'      => '(total_reserve - total_out)',   // 未出荷（計算列）
+];
+
+$sortKey = $_GET['sort'] ?? 'name';
+if (!array_key_exists($sortKey, $sortableColumns)) {
+    $sortKey = 'name'; // 不正な値が来たらデフォルトに戻す
+}
+$order = (($_GET['order'] ?? 'asc') === 'desc') ? 'DESC' : 'ASC';
+
 $sql .= " GROUP BY beans.id, beans.name, beans.supplier, beans.lot_no, beans.price, beans.kg_per_bag
-        ORDER BY beans.name";
+        ORDER BY {$sortableColumns[$sortKey]} {$order}";
 
 $stmt = $pdo->prepare($sql);
 if ($keyword !== '') {
@@ -93,23 +112,24 @@ foreach ($stocks as $stock) {
         <form method="get" action="" class="search-form">
             <input type="text" name="keyword" value="<?= h($keyword) ?>" placeholder="商品名・仕入先で検索" autocomplete="off">
             <button type="submit">検索</button>
+            <a href="index.php" class="delete-btn">クリア</a>
         </form>
 
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th>商品名</th>
+                        <th><?= sortLink('商品名', 'name', $sortKey, $order, $keyword) ?></th>
                         <th></th>
-                        <th>仕入先</th>
-                        <th>Lot No.</th>
-                        <th>販売定価</th>
-                        <th>kg/袋</th>
-                        <th>入荷</th>
-                        <th>予約</th>
-                        <th>販売</th>
-                        <th>在庫数</th>
-                        <th>未出荷</th>
+                        <th><?= sortLink('仕入先', 'supplier', $sortKey, $order, $keyword) ?></th>
+                        <th><?= sortLink('Lot No.', 'lot_no', $sortKey, $order, $keyword) ?></th>
+                        <th><?= sortLink('販売定価', 'price', $sortKey, $order, $keyword) ?></th>
+                        <th><?= sortLink('kg/袋', 'kg_per_bag', $sortKey, $order, $keyword) ?></th>
+                        <th><?= sortLink('入荷', 'total_in', $sortKey, $order, $keyword) ?></th>
+                        <th><?= sortLink('予約', 'total_reserve', $sortKey, $order, $keyword) ?></th>
+                        <th><?= sortLink('販売', 'total_out', $sortKey, $order, $keyword) ?></th>
+                        <th><?= sortLink('在庫数', 'zaiko', $sortKey, $order, $keyword) ?></th>
+                        <th><?= sortLink('未出荷', 'mishukka', $sortKey, $order, $keyword) ?></th>
                     </tr>
                 </thead>
                 <tbody>

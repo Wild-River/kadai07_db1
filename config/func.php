@@ -12,3 +12,17 @@ function typeLabels()
         'out'     => '販売',
     ];
 }
+
+function sortLink(string $label, string $key, string $currentSort, string $currentOrder, string $keyword): string
+{
+    $nextOrder = ($currentSort === $key && $currentOrder === 'ASC') ? 'desc' : 'asc';
+    $params = ['sort' => $key, 'order' => $nextOrder];
+    if ($keyword !== '') {
+        $params['keyword'] = $keyword;
+    }
+    $arrow = '';
+    if ($currentSort === $key) {
+        $arrow = $currentOrder === 'ASC' ? ' ▲' : ' ▼';
+    }
+    return '<a href="?' . h(http_build_query($params)) . '">' . h($label) . $arrow . '</a>';
+}

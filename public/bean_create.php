@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <button type="submit" class="submit-btn">
-                    送信する
+                    登録する
                 </button>
             </form>
         </div>

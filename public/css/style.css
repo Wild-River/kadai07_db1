@@ -3,22 +3,25 @@
    ========================================================== */
 
 :root {
-  --color-bg: #f4f6f4;
+  --color-bg: #f5f7f4;
   --color-surface: #ffffff;
-  --color-text: #24292f;
-  --color-muted: #6b7280;
-  --color-border: #dbe2dd;
+  --color-text: #1f2a24;
+  --color-muted: #6b7a70;
+  --color-border: #dce4dd;
 
-  --color-primary: #2f5b45;
-  --color-primary-dark: #234736;
+  --color-primary: #2c6b54;
+  --color-primary-dark: #1b4a38;
 
-  --color-low-stock-bg: #ecf0ec;
+  /* ロゴ準拠パレット：オレンジは在庫少バッジなど警告表現専用 */
+  --color-accent: #e08a3e;
+
+  --color-low-stock-bg: #f5f7f4;
   --color-danger: #b23b3b;
 
   /* グラフ・進行段階の表現に使う緑の単色ランプ（淡→濃） */
-  --color-stage-1: #94bda5;
-  --color-stage-2: #5c9179;
-  --color-stage-3: #2f5b45;
+  --color-stage-1: #78bc9e;
+  --color-stage-2: #4fa184;
+  --color-stage-3: #1b4a38;
 
   --radius: 6px;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -80,6 +83,44 @@ a {
   gap: 8px;
 }
 
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  cursor: pointer;
+}
+
+.menu-toggle__bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: 1px;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.menu-toggle[aria-expanded='true'] .menu-toggle__bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle[aria-expanded='true'] .menu-toggle__bar:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle[aria-expanded='true'] .menu-toggle__bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 .site-nav a {
   color: var(--color-text);
   padding: 6px 10px;
@@ -97,6 +138,7 @@ a {
 .nav-group {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
 }
 
@@ -146,6 +188,56 @@ a {
   white-space: nowrap;
 }
 
+/* ----- Header nav (SP対応: ハンバーガーメニュー) ----- */
+
+@media (max-width: 760px) {
+  .menu-toggle {
+    display: flex;
+  }
+
+  .site-nav {
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .site-nav.nav-open {
+    display: flex;
+  }
+
+  .site-nav > a,
+  .nav-group > a {
+    padding: 8px 10px;
+  }
+
+  /* 開閉せず常に子メニューを展開表示する */
+  .nav-toggle {
+    display: none;
+  }
+
+  .nav-dropdown {
+    display: flex;
+    position: static;
+    flex-basis: 100%;
+    width: 100%;
+    margin-top: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .nav-dropdown a {
+    padding-left: 28px;
+    /* color: var(--color-muted); */
+    font-size: 0.85rem;
+  }
+
+  .nav-dropdown a::before {
+    content: '- ';
+  }
+}
+
 /* ----- Page heading ----- */
 
 .page-title {
@@ -158,7 +250,7 @@ a {
 
 .card {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  /* border: 1px solid var(--color-border); */
   border-radius: var(--radius);
   padding: 24px;
 }
@@ -281,6 +373,11 @@ thead th {
   white-space: nowrap;
 }
 
+thead th a {
+  color: inherit;
+  text-decoration: none;
+}
+
 tbody td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--color-border);
@@ -300,7 +397,7 @@ tbody tr.low-stock {
 } */
 
 tbody tr.low-stock td {
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 
 .actions-cell {
@@ -317,9 +414,6 @@ tbody tr.low-stock td {
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-surface);
   color: var(--color-muted);
   font-size: 0.85rem;
   line-height: 1;
@@ -331,9 +425,7 @@ tbody tr.low-stock td {
 }
 
 .icon-btn:hover {
-  background-color: var(--color-bg);
   color: var(--color-primary);
-  border-color: var(--color-primary);
   text-decoration: none;
 }
 
@@ -389,7 +481,6 @@ select.form-input {
   color: #fff;
   font-size: 0.95rem;
   cursor: pointer;
-  margin-top: 8px;
 }
 
 .submit-btn:hover {
@@ -400,6 +491,7 @@ select.form-input {
   display: flex;
   gap: 12px;
   margin-top: 8px;
+  align-items: end;
 }
 
 .delete-btn {
@@ -412,7 +504,6 @@ select.form-input {
   background-color: #fff;
   font-size: 0.95rem;
   cursor: pointer;
-  margin-top: 8px;
 }
 
 .delete-btn:hover {

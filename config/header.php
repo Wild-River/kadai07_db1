@@ -1,7 +1,12 @@
     <header class="site-header">
         <div class="site-header__inner">
             <h1 class="site-title"><a href="index.php">コーヒー生豆在庫管理</a></h1>
-            <nav class="site-nav">
+            <button type="button" class="menu-toggle" aria-label="メニューを開く" aria-expanded="false" aria-controls="site-nav">
+                <span class="menu-toggle__bar"></span>
+                <span class="menu-toggle__bar"></span>
+                <span class="menu-toggle__bar"></span>
+            </button>
+            <nav class="site-nav" id="site-nav">
                 <div class="nav-group">
                     <a href="index.php">在庫管理</a>
                     <button type="button" class="nav-toggle" aria-label="サブメニューを開く" aria-expanded="false">▾</button>

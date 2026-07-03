@@ -1,6 +1,6 @@
 // 緑の単色ランプ（淡→濃）で「未予約在庫 → 予約中・未出荷 → 出荷済み」という
 // 進行段階を表す。1つの色相・単調な明度差でordinalチェックを通過済みの3色。
-const stageColors = ['#94bda5', '#5c9179', '#2f5b45'];
+const stageColors = ['#78bc9e', '#4fa184', '#2f5b45'];
 
 new ApexCharts(document.querySelector('#statusDonutChart'), {
     chart: {

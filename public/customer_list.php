@@ -34,26 +34,26 @@ $customers = $stmt->fetchAll();
                     <thead>
                         <tr>
                             <th>氏名</th>
+                            <th></th>
                             <th>会社名</th>
                             <th>メール</th>
                             <th>電話番号</th>
                             <th>備考</th>
-                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($customers as $customer) : ?>
                             <tr>
                                 <td><?= h($customer['name']) ?></td>
-                                <td><?= h($customer['company'] ?? '-') ?></td>
-                                <td><?= h($customer['email'] ?? '-') ?></td>
-                                <td><?= h($customer['phone'] ?? '-') ?></td>
-                                <td><?= h($customer['note'] ?? '-') ?></td>
                                 <td class="actions-cell">
                                     <a href="customer_edit.php?id=<?= h($customer['id']) ?>" class="icon-btn" title="編集" aria-label="編集">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
                                 </td>
+                                <td><?= h($customer['company'] ?? '-') ?></td>
+                                <td><?= h($customer['email'] ?? '-') ?></td>
+                                <td><?= h($customer['phone'] ?? '-') ?></td>
+                                <td><?= h($customer['note'] ?? '-') ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

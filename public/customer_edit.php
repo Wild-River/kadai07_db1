@@ -3,6 +3,8 @@ require_once '../config/auth.php';
 require_once '../config/db.php';
 require_once '../config/func.php';
 
+$typeLabels = typeLabels();
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // URLの ?id=◯ から id を受け取る
     $id = $_GET['id'];
@@ -13,6 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
     $customer = $stmt->fetch();
+
+    // この顧客に紐づく入出荷記録（購入した生豆一覧）
+    $sql = 'SELECT stock_movements.type, stock_movements.bags, stock_movements.moved_at,
+            beans.name AS bean_name
+            FROM stock_movements
+            JOIN beans ON stock_movements.bean_id = beans.id
+            WHERE stock_movements.customer_id = :id
+            ORDER BY stock_movements.moved_at DESC';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $movements = $stmt->fetchAll();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -119,6 +133,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </form>
 
                 <a href="customer_list.php" class="back-btn">戻る</a>
+            </div>
+
+            <div class="table-wrapper">
+                <?php if (empty($movements)): ?>
+                    <p>購入記録がありません</p>
+                <?php else: ?>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>日付</th>
+                                <th>生豆</th>
+                                <th>種類</th>
+                                <th>袋数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($movements as $movement): ?>
+                                <tr>
+                                    <td><?= h($movement['moved_at']) ?></td>
+                                    <td><?= h($movement['bean_name']) ?></td>
+                                    <td><?= h($typeLabels[$movement['type']]) ?></td>
+                                    <td><?= h($movement['bags']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
             </div>
 
         </div>
