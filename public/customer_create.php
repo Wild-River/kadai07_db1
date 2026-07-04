@@ -22,12 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 成功 → $_SESSION に記録して index.php へリダイレクト
     if (!$status) {
-        // 失敗 → エラーメッセージを変数に入れる
-        $error = $stmt->errorInfo();
-        exit('送信エラー:' . $error[2]);
+        sql_error($stmt);
     }
-    header('Location: customer_list.php');
-    exit;
+    redirect('customer_list.php');
 }
 ?>
 <!DOCTYPE html>

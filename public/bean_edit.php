@@ -47,14 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $status = $stmt->execute();
 
-    // 成功 → $_SESSION に記録して index.php へリダイレクト
     if (!$status) {
-        // 失敗 → エラーメッセージを変数に入れる
-        $error = $stmt->errorInfo();
-        exit('送信エラー:' . $error[2]);
+        sql_error($stmt);
     }
-    header('Location: index.php');
-    exit;
+    redirect('index.php');
 }
 
 ?>

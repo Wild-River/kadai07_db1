@@ -4,6 +4,19 @@ function h($value)
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
+function sql_error($stmt)
+{
+    $error = $stmt->errorInfo();
+    exit('送信エラー:' . $error[2]);
+}
+
+//リダイレクト
+function redirect($file_name)
+{
+    header("Location: " . $file_name);
+    exit();
+}
+
 function typeLabels()
 {
     return [

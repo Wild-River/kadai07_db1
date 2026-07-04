@@ -1,6 +1,6 @@
 <?php
+require_once __DIR__ . '/func.php';
 session_start();
 if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
-    exit;
+    redirect('login.php');
 }

@@ -97,12 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status = $stmt->execute();
 
         if (!$status) {
-            // 失敗 → エラーメッセージを変数に入れる
-            $error = $stmt->errorInfo();
-            exit('送信エラー:' . $error[2]);
+            sql_error($stmt);
         }
-        header('Location: movement_create.php');
-        exit;
+        redirect('movement_create.php');
     }
 }
 

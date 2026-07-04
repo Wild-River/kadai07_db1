@@ -1,6 +1,7 @@
 <?php
 require_once '../config/auth.php';
 require_once '../config/db.php';
+require_once '../config/func.php';
 
 $id = $_POST['id'];   // どの行を消すか受け取る
 
@@ -11,8 +12,6 @@ $status = $stmt->execute();
 
 // 早期リターンでエラー処理 →index.php へリダイレクト
 if (!$status) {
-    $error = $stmt->errorInfo();
-    exit('送信エラー:' . $error[2]);
+    sql_error($stmt);
 }
-header('Location:movement_create.php');
-exit;
+redirect('movement_create.php');
