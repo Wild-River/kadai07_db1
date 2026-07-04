@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 成功 → $_SESSION に記録して index.php へリダイレクト
     if ($admin && password_verify($password, $admin['password_hash'])) {
         session_regenerate_id(true); //ログイン成功時のみIDを再発行
+        $_SESSION['last_activity'] = time();
         $_SESSION['admin_id'] = $admin['id'];
         redirect('index.php');
     } else {
